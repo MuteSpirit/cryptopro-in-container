@@ -1,5 +1,5 @@
 # 2023 August
-FROM debian:stable@sha256:880aa5f5ab441ee739268e9553ee01e151ccdc52aa1cd545303cfd3d436c74db
+FROM debian:stable
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="${PATH}:/opt/cprocsp/bin/amd64/"
