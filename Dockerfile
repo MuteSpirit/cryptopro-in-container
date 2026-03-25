@@ -28,14 +28,14 @@ COPY libnpRutokenPlugin_*_amd64.deb /cryptopro
 
 RUN \
     cd /cryptopro/linux-amd64_deb && \
-    dpkg -i /cryptopro/librtpkcs11ecp_*_amd64.deb && \
     ./install.sh cprocsp-rdr-pcsc cprocsp-rdr-rutoken cprocsp-rdr-cryptoki lsb-cprocsp-pkcs11 && \
+    dpkg -i /cryptopro/librtpkcs11ecp_*_amd64.deb && \
     dpkg -i /cryptopro/moedelo-plugin_*_amd64.deb && \
     dpkg -i /cryptopro/diag.plugin_amd64*.deb && \
     dpkg -i /cryptopro/IFCPlugin-x86_64.deb && \
     dpkg -i /cryptopro/libnpRutokenPlugin_*_amd64.deb && \
-    dpkg -i /cryptopro/linux-amd64_deb/cprocsp-cptools-gtk*amd64.deb && \
     dpkg -i /cryptopro/linux-amd64_deb/cprocsp-rdr-gui-gtk*amd64.deb && \
+    dpkg -i /cryptopro/linux-amd64_deb/cprocsp-cptools-gtk*amd64.deb && \
     dpkg -i /cryptopro/linux-amd64_deb/cprocsp-rdr-pcsc*amd64.deb && \
     dpkg -i /cryptopro/linux-amd64_deb/cprocsp-rdr-rutoken*amd64.deb && \
     dpkg -i /cryptopro/linux-amd64_deb/cprocsp-rdr-cryptoki*amd64.deb && \
