@@ -4,6 +4,10 @@ FROM debian:stable
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="${PATH}:/opt/cprocsp/bin/amd64/"
 
+# first install generic packages (1st layer, does not depend on fns stuff)
+RUN apt-get update && \
+    apt-get install -y whiptail libccid libpcsclite1 pcscd pcsc-tools opensc libgtk2.0-0 libcanberra-gtk3-module libcanberra-gtk3-0 libsm6 firefox-esr nano locales libpci-dev
+
 # Downloaded from https://www.cryptopro.ru/fns_experiment
 ADD linux-amd64_deb.tgz /cryptopro
 
@@ -22,8 +26,7 @@ COPY IFCPlugin-x86_64.deb /cryptopro
 # Downloaded from https://www.rutoken.ru/support/download/get/rtPlugin-deb-x64.html
 COPY libnpRutokenPlugin_*_amd64.deb /cryptopro
 
-RUN apt-get update && \
-    apt-get install -y whiptail libccid libpcsclite1 pcscd pcsc-tools opensc libgtk2.0-0 libcanberra-gtk-module libcanberra-gtk3-0 libsm6 firefox-esr nano locales libpci-dev && \
+RUN \
     cd /cryptopro/linux-amd64_deb && \
     dpkg -i /cryptopro/librtpkcs11ecp_*_amd64.deb && \
     ./install.sh cprocsp-rdr-pcsc cprocsp-rdr-rutoken cprocsp-rdr-cryptoki lsb-cprocsp-pkcs11 && \
