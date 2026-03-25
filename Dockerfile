@@ -1,7 +1,7 @@
 # 2023 August
 FROM debian:stable@sha256:880aa5f5ab441ee739268e9553ee01e151ccdc52aa1cd545303cfd3d436c74db
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="${PATH}:/opt/cprocsp/bin/amd64/"
 
 # Downloaded from https://www.cryptopro.ru/fns_experiment
@@ -47,9 +47,9 @@ RUN apt-get update && \
     echo "export NO_AT_BRIDGE=1" >> /root/.bashrc && \
     echo "alias ll='ls -alFh'" >> /root/.bashrc
 
-ENV LANG ru_RU.UTF-8
-ENV LANGUAGE ru_RU:ru
-ENV LC_ALL ru_RU.UTF-8
+ENV LANG=ru_RU.UTF-8
+ENV LANGUAGE=ru_RU:ru
+ENV LC_ALL=ru_RU.UTF-8
 
 # Downloaded from https://www.cryptopro.ru/sites/default/files/products/cades/extensions/firefox_cryptopro_extension_latest.xpi
 COPY firefox_cryptopro_extension_latest.xpi /usr/lib/firefox-esr/distribution/extensions/ru.cryptopro.nmcades@cryptopro.ru.xpi
