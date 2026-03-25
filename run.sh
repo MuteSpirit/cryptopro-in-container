@@ -1,0 +1,1 @@
+docker  run --rm -it -v `pwd`/:/something -v /run/pcscd/pcscd.comm:/run/pcscd/pcscd.comm -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY="$DISPLAY" cryptopro:latest firefox
