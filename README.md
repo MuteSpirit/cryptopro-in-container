@@ -36,21 +36,23 @@ make
 
 Allow access to EDS tokens for unprivileged user on host OS:
 ```
-    cat <<EOF > /usr/share/polkit-1/rules.d/pcsc.rules
+cat <<EOF > /tmp/pcsc.rules
 polkit.addRule(function(action, subject) {
-    if (action.id == "org.debian.pcsc-lite.access_card" &&
-        subject.user == "$USER") {
-            return polkit.Result.YES;
-    }
+if (action.id == "org.debian.pcsc-lite.access_card" &&
+    subject.user == "$USER") {
+        return polkit.Result.YES;
+}
 });
 
 polkit.addRule(function(action, subject) {
-    if (action.id == "org.debian.pcsc-lite.access_pcsc" &&
-        subject.user == "$USER") {
-            return polkit.Result.YES;
-    }
+if (action.id == "org.debian.pcsc-lite.access_pcsc" &&
+    subject.user == "$USER") {
+        return polkit.Result.YES;
+}
 });
 EOF
+
+sudo cp /tmp/pcsc.rules /usr/share/polkit-1/rules.d/pcsc.rules
 ```
 After trial period expiration (in 90 days) you'll have to buy license or rebuild Docker image again.
 
