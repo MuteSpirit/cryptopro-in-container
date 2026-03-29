@@ -1,0 +1,13 @@
+Types: deb
+# http://snapshot.debian.org/archive/20260316T000000Z
+URIs: http://mirror.yandex.ru/debian
+Suites: bookworm bookworm-updates
+Components: main
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+Types: deb
+# http://snapshot.debian.org/archive-security/20260316T000000Z
+URIs: http://mirror.yandex.ru/debian-security
+Suites: bookworm-security
+Components: main
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg

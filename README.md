@@ -33,3 +33,59 @@ Total: SYS: 0.010 sec USR: 0.040 sec UTC: 0.820 sec
 - Ненужный контейнер можно удалить `docker rm  $(docker ps -l -f 'name=cryptopro_doc' --format "{{.ID}}")`
 - Запускаем браузер `firefox` и CryptoPro `cptools` кликом по ярлыку `FFNCP.desktop`
 - Через 90 дней, по окончании триала КриптоПро пересобираем контейнер
+
+## Usecase
+
+Use RuToken EDS to login via EDS on nalog.ru or gosuslugi.ru
+
+## Notes
+
+* Yandex Browser for Corporations is not suitable because only Windows version is available. See https://browser.yandex.ru/b/cryptopro_plugin
+* pcscd MUST be the same version on host and in container. Otherwise you will see on host errors like:
+```
+  systemctl status pcscd 
+...
+Mar 29 16:10:30 pc2 pcscd[227592]: 69700788 winscard_svc.c:402:ContextThread() Communication protocol mismatch!
+Mar 29 16:10:30 pc2 pcscd[227592]: 00000012 winscard_svc.c:404:ContextThread() Client protocol is 4:5
+Mar 29 16:10:30 pc2 pcscd[227592]: 00000003 winscard_svc.c:406:ContextThread() Server protocol is 4:4
+```
+
+## Troubleshooting
+
+### User is NOT authorized for action: access_pcsc
+
+Run 'opensc-tool --list-readers' in container
+
+```
+  systemctl status pcscd 
+...
+Mar 29 16:38:52 pc2 pcscd[227592]: 99999999 auth.c:143:IsClientAuthorized() Process 319219 (user: 1000) is NOT authorized for action: access_pcsc
+Mar 29 16:38:52 pc2 pcscd[227592]: 00000133 winscard_svc.c:355:ContextThread() Rejected unauthorized PC/SC client
+```
+
+HOWTO fix
+
+On host
+```
+    cat <<EOF > /usr/share/polkit-1/rules.d/pcsc.rules
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.debian.pcsc-lite.access_card" &&
+        subject.user == "$USER") {
+            return polkit.Result.YES;
+    }
+});
+
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.debian.pcsc-lite.access_pcsc" &&
+        subject.user == "$USER") {
+            return polkit.Result.YES;
+    }
+});
+EOF
+
+```
+
+### No smart card readers found
+
+Run 'opensc-tool --list-readers' in container
+Run 'systemctl status pcscd' on host and read log messages
