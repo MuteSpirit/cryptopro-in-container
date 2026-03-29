@@ -7,7 +7,7 @@ docker run --rm -it --shm-size 2G \
            -e ENV_USER_ID="$(id -u)" \
            -e ENV_USER_GROUP_ID="$(id -g)" \
            --security-opt="seccomp=unconfined" \
-           -v "$(pwd)/Documents":"$HOME/Documents" \
+           -v "$(pwd)/Downloads":"$HOME/Downloads" \
            -v /run/pcscd/pcscd.comm:/run/pcscd/pcscd.comm \
            -v /tmp/.X11-unix:/tmp/.X11-unix \
            -v "$HOME/.Xauthority":"$HOME/.Xauthority" \
