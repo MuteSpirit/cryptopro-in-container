@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=FF_N_CP.desktop
-Comment=<A SHORT DESCRIPTION>
-Exec=guake -e "docker run --rm -ti -v /home/$USER/Documents:/Documents -v /run/pcscd/pcscd.comm:/run/pcscd/pcscd.comm -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY "cryptopro-in-container:latest" /bin/bash -c 'firefox |& cptools'"
-Type=Application
-Terminal=false
-Icon=<ICON NAME OR PATH TO ICON>
-NoDisplay=false
