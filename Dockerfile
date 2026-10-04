@@ -12,7 +12,7 @@
 #   CryptoPRO docker based on Debian 13 with pcscd 2.3.3-1 on host OS Ubuntu 22.04 with pcscd 2.0.3-1build1
 #   PSCSD client in container tried to use newer protocol version and PSCSD server on host rejected it's requests.
 #   So Debian Bookworm has been chosen.
-FROM debian:bookworm
+FROM debian:bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="${PATH}:/opt/cprocsp/bin/amd64/"
@@ -22,6 +22,8 @@ COPY files/debian-bookworm-yandex-mirror.sources /etc/apt/sources.list.d/debian.
 
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
+      # Some modern CA certs are unknown by Debian Bookworm base docker image. So install latest ones
+      ca-certificates \
       libccid \
       libpcsclite1 \
       pcscd \
@@ -37,8 +39,7 @@ RUN apt-get update && \
       whiptail \
       # For Firefox plugins XPI files downloading
       wget \
-      # Some modern CA certs are unknown by Debian Bookworm base docker image. So install latest ones
-      ca-certificates \
+      curl \
       # Firefox plugins install script dependencies:
       unzip \
       jq && \
@@ -71,32 +72,36 @@ COPY rtconnect*_amd64.deb /cryptopro
 #   Reason: web site allows to get file only after fill authentication form
 COPY cades-linux-amd64.tar.gz /cryptopro
 
-RUN apt-get update && \
-    apt-get install --yes --no-install-recommends \
-      ca-certificates && \
-    apt-get --yes clean
-
 # Plugin to work with Gosuslugi govenment web portal
 # Download page: https://ds-plugin.gosuslugi.ru/plugin/upload/Index.spr
 RUN wget -O /cryptopro/IFCPlugin-x86_64.deb https://ds-plugin.gosuslugi.ru/plugin/upload/assets/distrib/IFCPlugin-x86_64.deb
 
 RUN \
+    cd /cryptopro && \
+    tar xf cades-linux-amd64.tar.gz && \
+    \
     cd /cryptopro/linux-amd64_deb && \
     ./install.sh cprocsp-rdr-pcsc cprocsp-rdr-rutoken cprocsp-rdr-cryptoki lsb-cprocsp-pkcs11 && \
-    dpkg -i /cryptopro/librtpkcs11ecp_*_amd64.deb && \
-    dpkg -i /cryptopro/IFCPlugin-x86_64.deb && \
-    dpkg -i /cryptopro/rtconnect*_amd64.deb && \
-    dpkg -i /cryptopro/libnpRutokenPlugin_*_amd64.deb && \
-    dpkg -i /cryptopro/linux-amd64_deb/cprocsp-rdr-gui-gtk*amd64.deb && \
-    dpkg -i /cryptopro/linux-amd64_deb/cprocsp-cptools-gtk*amd64.deb && \
-    dpkg -i /cryptopro/linux-amd64_deb/cprocsp-rdr-pcsc*amd64.deb && \
-    dpkg -i /cryptopro/linux-amd64_deb/cprocsp-rdr-rutoken*amd64.deb && \
-    dpkg -i /cryptopro/linux-amd64_deb/cprocsp-rdr-cryptoki*amd64.deb && \
-    dpkg -i /cryptopro/linux-amd64_deb/lsb-cprocsp-import-ca-certs*all.deb && \
-    dpkg -i /cryptopro/linux-amd64_deb/cprocsp-pki-cades*amd64.deb && \
-    dpkg -i /cryptopro/linux-amd64_deb/cprocsp-pki-plugin*amd64.deb && \
-    dpkg -i /cryptopro/linux-amd64_deb/cprocsp-pki-phpcades*all.deb && \
-    sed -i -e 's/# ru_RU.UTF-8 UTF-8/ru_RU.UTF-8 UTF-8/' /etc/locale.gen && \
+    \
+    dpkg -i /cryptopro/linux-amd64_deb/cprocsp-rdr-gui-gtk*amd64.deb \
+            /cryptopro/linux-amd64_deb/cprocsp-cptools-gtk*amd64.deb \
+            /cryptopro/linux-amd64_deb/cprocsp-rdr-pcsc*amd64.deb \
+            /cryptopro/linux-amd64_deb/cprocsp-rdr-rutoken*amd64.deb \
+            /cryptopro/linux-amd64_deb/cprocsp-rdr-cryptoki*amd64.deb \
+            /cryptopro/linux-amd64_deb/lsb-cprocsp-import-ca-certs*all.deb \
+            /cryptopro/linux-amd64_deb/cprocsp-pki-phpcades*all.deb \
+            /cryptopro/librtpkcs11ecp_*_amd64.deb \
+            /cryptopro/IFCPlugin-x86_64.deb \
+            /cryptopro/rtconnect*_amd64.deb \
+            /cryptopro/libnpRutokenPlugin_*_amd64.deb \
+            /cryptopro/cades-linux-amd64/cprocsp-pki*.deb && \
+    \
+    rm -rf /cryptopro/linux-amd64_deb \
+           /cryptopro/cades-linux-amd64 \
+           /cryptopro/*.deb \
+           /cryptopro/*.tar.gz
+
+RUN sed -i -e 's/# ru_RU.UTF-8 UTF-8/ru_RU.UTF-8 UTF-8/' /etc/locale.gen && \
     dpkg-reconfigure --frontend=noninteractive locales && update-locale LANG=ru_RU.UTF-8 && \
     ln -snf /usr/share/zoneinfo/Europe/Moscow /etc/localtime && \
     echo Europe/Moscow > /etc/timezone && \
@@ -111,10 +116,6 @@ ENV LC_ALL=ru_RU.UTF-8
 # * ChromiumGost had no updates for a long time
 # * Yandex Browser for Corporates has version for Windows only
 # * Firefox is in list of supported browsers by nalog.ru and gosuslugi.ru
-
-RUN apt-get update && \
-    apt-get install -y \
-      jq
 
 COPY files/install_firefox_addon.sh /cryptopro/
 
@@ -150,10 +151,6 @@ COPY files/entrypoint.sh /cryptopro/entrypoint.sh
 ENTRYPOINT ["/cryptopro/entrypoint.sh"]
 
 CMD ["/usr/bin/firefox --browser --new-tab https://lkip2.nalog.ru/lk#/rutoken-gost --new-tab https://www.cryptopro.ru/sites/default/files/products/cades/demopage/cades_bes_sample.html --new-tab https://gosuslugi.ru"]
-
-RUN cd /cryptopro && \
-    tar xf cades-linux-amd64.tar.gz && \
-    dpkg -i /cryptopro/cades-linux-amd64/cprocsp-pki*.deb
 #
 # Chromium Gost
 # RUN cd /cryptopro && \

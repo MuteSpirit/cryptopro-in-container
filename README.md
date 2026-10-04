@@ -70,10 +70,10 @@ After trial period expiration (in 90 days) you'll have to buy license or rebuild
 Note: Docker and Podman has similar container sizes:
 ```
 $ docker image ls | grep crypto
-cryptopro        latest              d5fc2bdc64f8   22 hours ago   1.14GB
+cryptopro        latest              c2efb2b8ab16   2 minutes ago    915MB
 
 $ podman image ls | grep crypto
-localhost/cryptopro       latest         82eebe5f1f71  22 hours ago   1.16 GB
+localhost/cryptopro       latest         dfaf2dbe6cfd  26 minutes ago     930 MB
 
 ```
 
