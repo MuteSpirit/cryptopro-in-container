@@ -1,4 +1,6 @@
-# 2026 March
+# 2026 Oct
+
+# TODO: delete all downloaded and already installed DEB packages
 
 # From https://support.cryptopro.ru/index.php?/Knowledgebase/Article/View/390/0/rbot-s-kriptopro-csp-v-linux-n-primere-debian-11
 #  Debian 11 has been tested by CryptoPRO CSP 5.0 producer at 2022 year
@@ -148,3 +150,13 @@ COPY files/entrypoint.sh /cryptopro/entrypoint.sh
 ENTRYPOINT ["/cryptopro/entrypoint.sh"]
 
 CMD ["/usr/bin/firefox --browser --new-tab https://lkip2.nalog.ru/lk#/rutoken-gost --new-tab https://www.cryptopro.ru/sites/default/files/products/cades/demopage/cades_bes_sample.html --new-tab https://gosuslugi.ru"]
+
+RUN cd /cryptopro && \
+    tar xf cades-linux-amd64.tar.gz && \
+    dpkg -i /cryptopro/cades-linux-amd64/cprocsp-pki*.deb
+#
+# Chromium Gost
+# RUN cd /cryptopro && \
+#     wget https://github.com/deemru/Chromium-Gost/releases/download/152.0.7977.149/chromium-gost-152.0.7977.149-linux-amd64.deb && \
+#     dpkg -i /cryptopro/chromium-gost*.deb; \
+#     apt -f install

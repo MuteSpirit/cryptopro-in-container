@@ -1,4 +1,4 @@
-# CryptoPRO CSP in Docker container
+# CryptoPRO CSP in Docker/Podman container
 
 Container allows ...
 * ... to use qualified electronic signature on nalog.ru portal
@@ -6,7 +6,9 @@ Container allows ...
 
 Use case has been tested on Ubuntu 22.04.4 LTS using Rutoken EDS 3.0
 
-# HOWTO install
+# HOWTO Build and install
+
+## Do on host system
 
 Install on host system:
 * pcscd
@@ -18,20 +20,6 @@ See more details on
 Run service "pcscd"
 ```
 sudo systemctl enable --now pcscd
-```
-
-Download preliminary into current folder:
-* CryptoPRO distro from https://www.cryptopro.ru/fns_experiment
-* Rutoken Driver from https://www.rutoken.ru/support/download/pkcs/#linux
-* Rutoken Plugin from https://www.rutoken.ru/support/download/get/rtPlugin-deb-x64.html
-* Rutoken Connect from https://www.rutoken.ru/support/download/get/rtconnect-x64-deb.html
-* CryptoPRO browser plugin https://cryptopro.ru/products/cades/plugin
-* Rutoken Plugin Adapter Firefox plugin https://addons.mozilla.org/ru/firefox/addon/adapter-rutoken-plugin/
-* Gosuslugi Firefox plugin https://ds-plugin.gosuslugi.ru/plugin/upload/Index.spr
-
-Build Docker image
-```
-make
 ```
 
 Allow access to EDS tokens for unprivileged user on host OS:
@@ -54,14 +42,51 @@ EOF
 
 sudo cp /tmp/pcsc.rules /usr/share/polkit-1/rules.d/pcsc.rules
 ```
-After trial period expiration (in 90 days) you'll have to buy license or rebuild Docker image again.
+
+## Build container image(s)
+
+Download DEB package preliminary into current folder:
+* CryptoPRO distro from https://www.cryptopro.ru/fns_experiment
+* Rutoken Driver from https://www.rutoken.ru/support/download/pkcs/#linux
+* Rutoken Plugin from https://www.rutoken.ru/support/download/get/rtPlugin-deb-x64.html
+* Rutoken Connect from https://www.rutoken.ru/support/download/get/rtconnect-x64-deb.html
+* CryptoPRO browser plugin https://cryptopro.ru/products/cades/plugin
+* Rutoken Plugin Adapter Firefox plugin https://addons.mozilla.org/ru/firefox/addon/adapter-rutoken-plugin/
+* Gosuslugi Firefox plugin https://ds-plugin.gosuslugi.ru/plugin/upload/Index.spr
+
+!!! Warning !!! If you download DEB packages again then remove DEB files of old versions before start build container image.
+
+Build Docker image
+```
+make docker-img
+```
+or build Podman image
+```
+make podman-img
+```
+
+After trial period expiration (in 90 days) you'll have to buy license or rebuild container image again.
+
+Note: Docker and Podman has similar container sizes:
+```
+$ docker image ls | grep crypto
+cryptopro        latest              d5fc2bdc64f8   22 hours ago   1.14GB
+
+$ podman image ls | grep crypto
+localhost/cryptopro       latest         82eebe5f1f71  22 hours ago   1.16 GB
+
+```
 
 ## Use case
 
 - Plug-in Rutoken EDS.
-- Run container:
+- Run Docker container:
 ```
-./run.sh
+make docker-run
+```
+or run Podman container
+```
+make podman-run
 ```
 
 ## Notes
@@ -70,7 +95,7 @@ After trial period expiration (in 90 days) you'll have to buy license or rebuild
 
 # Troubleshooting
 
-## User is NOT authorized for action: access_pcsc
+## User is NOT authorized for action: `access_pcsc`
 
 ### Error
 

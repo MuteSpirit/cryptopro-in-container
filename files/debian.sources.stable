@@ -1,0 +1,13 @@
+Types: deb
+# http://snapshot.debian.org/archive/20260316T000000Z
+URIs: http://mirror.yandex.ru/debian
+Suites: stable stable-updates
+Components: main
+Signed-By: /usr/share/keyrings/debian-archive-keyring.pgp
+
+Types: deb
+# http://snapshot.debian.org/archive-security/20260316T000000Z
+URIs: http://mirror.yandex.ru/debian-security
+Suites: stable-security
+Components: main
+Signed-By: /usr/share/keyrings/debian-archive-keyring.pgp
