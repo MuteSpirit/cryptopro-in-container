@@ -147,6 +147,21 @@ RUN /cryptopro/install_firefox_addon.sh /cryptopro/adapter_rutoken_plugin*.xpi "
 COPY addon*.xpi /cryptopro/
 RUN /cryptopro/install_firefox_addon.sh /cryptopro/addon*.xpi "$FIREFOX_EXTENSIONS_DIR"
 
+#
+# Russian governmental root certificates has been revoked by international certificate centers.
+# Then has been generated as isolated certificate chain.
+# Therefore they must be added manually.
+# Following Mincifry manual:
+#   https://www.gosuslugi.ru/landing/crt_linux
+#
+RUN wget -O /usr/local/share/ca-certificates/Russian_Trusted_Root_CA.crt \
+        https://gu-st.ru/content/downloads/Russian_Trusted_Root_CA.cer && \
+    wget -O /usr/local/share/ca-certificates/Russian_Trusted_Sub_CA.crt \
+        https://gu-st.ru/content/downloads/Russian_Trusted_Sub_CA.cer && \
+    wget -O /usr/local/share/ca-certificates/Russian_Trusted_Sub_CA_2024.cer \
+        https://gu-st.ru/content/downloads/Russian_Trusted_Sub_CA_2024.cer && \
+    update-ca-certificates
+
 COPY files/entrypoint.sh /cryptopro/entrypoint.sh
 ENTRYPOINT ["/cryptopro/entrypoint.sh"]
 
