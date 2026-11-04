@@ -2,7 +2,7 @@
 # '--shm-size 2G' is needed to more stable Firefox work and avoid crashing on shared memory lacks
 # --security-opt="seccomp=unconfined": avoids Firefox error "Sandbox: CanCreateUserNamespace() clone() failure: EPERM"
 
-RUNNER=${1:-docker}
+RUNNER=${RUNNER:-docker}
 
 $RUNNER run --rm -it --shm-size 2G \
            -e DISPLAY="$DISPLAY" \
@@ -13,5 +13,5 @@ $RUNNER run --rm -it --shm-size 2G \
            -v "$(pwd)/Downloads":"$HOME/Downloads" \
            -v /run/pcscd/pcscd.comm:/run/pcscd/pcscd.comm \
            -v /tmp/.X11-unix:/tmp/.X11-unix \
-           -v "$HOME/.Xauthority":"$HOME/.Xauthority" \
+           -v "$HOME/.Xauthority":"$HOME/.Xauthority:ro" \
            cryptopro $@
