@@ -79,15 +79,22 @@ localhost/cryptopro       latest         dfaf2dbe6cfd  26 minutes ago     930 MB
 
 ```
 
+## Configure X11
+
+If you're on a Wayland session, you may also need to run this once on the host to allow the X11 forwarding:
+```sh
+xhost +local:
+```
+
 ## Use case
 
 - Plug-in Rutoken EDS.
 - Run Docker container:
-```
+```sh
 make docker-run
 ```
 or run Podman container
-```
+```sh
 make podman-run
 ```
 
