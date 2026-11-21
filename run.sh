@@ -1,6 +1,6 @@
 #!/bin/sh
-# '--shm-size 2G' is needed to more stable Firefox work and avoid crashing on shared memory lacks
-# --security-opt="seccomp=unconfined": avoids Firefox error "Sandbox: CanCreateUserNamespace() clone() failure: EPERM"
+# '--shm-size 2G' is needed to more stable Chromium-Gost work and avoid crashing on shared memory lacks
+# --security-opt="seccomp=unconfined": avoids Chromium-Gost sandbox errors inside the container
 
 RUNNER=${RUNNER:-docker}
 

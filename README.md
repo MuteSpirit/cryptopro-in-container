@@ -51,8 +51,10 @@ Download DEB package preliminary into current folder:
 * Rutoken Plugin from https://www.rutoken.ru/support/download/get/rtPlugin-deb-x64.html
 * Rutoken Connect from https://www.rutoken.ru/support/download/get/rtconnect-x64-deb.html
 * CryptoPRO browser plugin https://cryptopro.ru/products/cades/plugin
-* Rutoken Plugin Adapter Firefox plugin https://addons.mozilla.org/ru/firefox/addon/adapter-rutoken-plugin/
-* Gosuslugi Firefox plugin https://ds-plugin.gosuslugi.ru/plugin/upload/Index.spr
+
+Chromium-Gost already includes CryptoPRO CAdES and Gosuslugi browser extensions.
+Rutoken browser extensions are force-installed from Chrome Web Store on first launch,
+so internet access is required at least once.
 
 !!! Warning !!! If you download DEB packages again then remove DEB files of old versions before start build container image.
 

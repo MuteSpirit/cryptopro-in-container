@@ -33,15 +33,13 @@ RUN apt-get update && \
       libcanberra-gtk3-module \
       libcanberra-gtk3-0 \
       libsm6 \
-      firefox-esr \
       locales \
       libpci-dev \
       whiptail \
-      # For Firefox plugins XPI files downloading
+      # For Chromium-Gost DEB downloading
       wget \
       curl \
-      # Firefox plugins install script dependencies:
-      unzip \
+      # For parsing GitHub releases API response
       jq && \
     apt-get --yes clean
 
@@ -112,41 +110,6 @@ ENV LANG=ru_RU.UTF-8
 ENV LANGUAGE=ru_RU:ru
 ENV LC_ALL=ru_RU.UTF-8
 
-# Firefox browser has been chosen because:
-# * ChromiumGost had no updates for a long time
-# * Yandex Browser for Corporates has version for Windows only
-# * Firefox is in list of supported browsers by nalog.ru and gosuslugi.ru
-
-COPY files/install_firefox_addon.sh /cryptopro/
-
-ENV FIREFOX_EXTENSIONS_DIR="/usr/lib/firefox-esr/distribution/extensions"
-RUN mkdir -p "$FIREFOX_EXTENSIONS_DIR"
-
-# CryptoPRO Firefox browser plugin
-# Download page: https://www.cryptopro.ru/sites/default/files/products/cades/extensions/firefox_cryptopro_extension_latest.xpi
-RUN wget -O /cryptopro/firefox_cryptopro_extension_latest.xpi \
-      https://www.cryptopro.ru/sites/default/files/products/cades/extensions/firefox_cryptopro_extension_latest.xpi && \
-    /cryptopro/install_firefox_addon.sh /cryptopro/firefox_cryptopro_extension_latest.xpi "$FIREFOX_EXTENSIONS_DIR"
-
-# Rutoken Connect Firefox browser plugin
-RUN wget -O /cryptopro/RutokenConnect.xpi \
-      http://download.rutoken.ru/Rutoken_Connect/extension/Current/RutokenConnect.xpi && \
-    /cryptopro/install_firefox_addon.sh /cryptopro/RutokenConnect.xpi "$FIREFOX_EXTENSIONS_DIR"
-
-# Rutoken Plugin Firefox browser plugin 
-# Download it manually from https://addons.mozilla.org/ru/firefox/addon/adapter-rutoken-plugin/
-#   Reason: direct download link is depend on product version, e.g.
-#     https://addons.mozilla.org/firefox/downloads/file/3450175/adapter_rutoken_plugin-1.0.5.0.xpi
-COPY adapter_rutoken_plugin*.xpi /cryptopro/
-RUN /cryptopro/install_firefox_addon.sh /cryptopro/adapter_rutoken_plugin*.xpi "$FIREFOX_EXTENSIONS_DIR"
-
-# Gosuslugi Firefox browser plugin
-# Download it manually from https://ds-plugin.gosuslugi.ru/plugin/upload/Index.spr
-#   Reason: direct download link is depend on product version, e.g.
-#     https://ds-plugin.gosuslugi.ru/plugin/upload/assets/distrib/addon-1.2.8-fx.xpi
-COPY addon*.xpi /cryptopro/
-RUN /cryptopro/install_firefox_addon.sh /cryptopro/addon*.xpi "$FIREFOX_EXTENSIONS_DIR"
-
 #
 # Russian governmental root certificates has been revoked by international certificate centers.
 # Then has been generated as isolated certificate chain.
@@ -165,10 +128,40 @@ RUN wget -O /usr/local/share/ca-certificates/Russian_Trusted_Root_CA.crt \
 COPY files/entrypoint.sh /cryptopro/entrypoint.sh
 ENTRYPOINT ["/cryptopro/entrypoint.sh"]
 
-CMD ["/usr/bin/firefox --browser --new-tab https://lkip2.nalog.ru/lk#/rutoken-gost --new-tab https://www.cryptopro.ru/sites/default/files/products/cades/demopage/cades_bes_sample.html --new-tab https://gosuslugi.ru"]
+# Chromium-Gost has been chosen because:
+# * Installation new RU Mincifry certificates is non trivial for Firefox in batch mode. Without that
+#   certificates the most RU governmental web-sites treated as non-trusted by Firefox
+# * Chromium-Gost contains that certificates by default
+# * Chromium-Gost has built-in CryptoPro CAdES and Gosuslugi extensions.
+# * Yandex Browser for Corporates has version for Windows only
 #
-# Chromium Gost
-# RUN cd /cryptopro && \
-#     wget https://github.com/deemru/Chromium-Gost/releases/download/152.0.7977.149/chromium-gost-152.0.7977.149-linux-amd64.deb && \
-#     dpkg -i /cryptopro/chromium-gost*.deb; \
-#     apt -f install
+# Rutoken extensions are installed from Chrome Web Store by force-install policy.
+# Native messaging hosts are registered by the vendor DEB packages in
+# /etc/chromium/native-messaging-hosts.
+RUN cd /cryptopro && \
+    wget -O chromium-gost.deb $(wget -O- https://api.github.com/repos/deemru/Chromium-Gost/releases/latest | jq '.assets[].browser_download_url' | tr -d '"' | grep '.*amd64.*.deb' | head -n 1) && \
+    dpkg -i ./chromium-gost.deb; \
+    apt -y -f install && \
+    rm ./chromium-gost.deb
+
+# Force-installed extensions from Chrome Web Store.
+# ExtensionInstallForcelist elements correspond to the Rutoken native packages:
+#   acbchkahfmndkenefkcklofjmipghjjp - Rutoken Connect adapter (rtconnect*_amd64.deb)
+#   ohedcglhbbfdgaogjhcclacoccbagkjg - Rutoken Plugin adapter (libnpRutokenPlugin_*_amd64.deb)
+# CryptoPro CAdES and Gosuslugi (Gosplugin) extensions are not listed here:
+# they are provided by Chromium-Gost built-ins and the Gosplugin DEB installer.
+RUN mkdir -p /etc/chromium/policies/managed && \
+    echo '{"ExtensionInstallForcelist":["acbchkahfmndkenefkcklofjmipghjjp","ohedcglhbbfdgaogjhcclacoccbagkjg"]}' \
+      > /etc/chromium/policies/managed/cryptopro.json
+
+RUN apt-get install --yes --no-install-recommends \
+        unzip && \
+    apt-get --yes clean && \
+    cd /cryptopro && \
+    wget https://gu-st.ru/content/Gosplugin/Gosplugin_Linux-Debian_Installer.deb.zip && \
+    unzip Gosplugin_Linux-Debian_Installer.deb.zip && \
+    rm Gosplugin_Linux-Debian_Installer.deb.zip && \
+    bash ./Gosplugin_Linux-Debian_Installer.deb.sh && \
+    rm ./Gosplugin_Linux-Debian_Installer.deb.sh
+
+CMD ["/usr/bin/chromium-gost-stable", "--new-window", "https://lkip2.nalog.ru/lk#/rutoken-gost", "https://www.cryptopro.ru/sites/default/files/products/cades/demopage/cades_bes_sample.html", "https://gosuslugi.ru"]
